@@ -1,0 +1,19 @@
+# venv / caches
+.venv/
+__pycache__/
+*.pyc
+
+# notebooks
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# local env
+.env
+
+# generated outputs
+data/*.csv
+data/*.png

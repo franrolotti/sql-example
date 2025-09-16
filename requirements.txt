@@ -1,0 +1,6 @@
+jupyter
+pandas
+matplotlib
+SQLAlchemy>=2.0
+psycopg[binary]>=3.0
+python-dotenv

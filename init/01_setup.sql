@@ -1,0 +1,4 @@
+ALTER DATABASE practice SET TIMEZONE = 'Europe/Madrid';
+CREATE SCHEMA IF NOT EXISTS jm AUTHORIZATION admin; 
+SET search_path TO jm, public;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
