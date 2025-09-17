@@ -26,12 +26,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'   # or 3.12; both work with sqlfluff 3.x
+          cache: 'pip'
+
       - name: Install deps (psql client & sqlfluff)
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
           python -m pip install --upgrade pip
-          pip install "sqlfluff>=3.0.0" "sqlfluff-templater-jinja"
+          python -m pip install "sqlfluff[jinja]>=3.0.0"
 
       - name: Wait for Postgres
         run: |
@@ -52,7 +58,7 @@ jobs:
 
       - name: Lint SQL
         run: |
-          sqlfluff lint sql init
+          python -m sqlfluff lint sql init
 
       - name: Smoke-run queries in sql/
         env:
@@ -62,6 +68,5 @@ jobs:
           shopt -s nullglob
           for f in sql/*.sql; do
             echo "=== Running $f ==="
-            # Fail on first error; only the *final* statement's result is returned (fine for SELECTs)
             psql "$PGURL" -v ON_ERROR_STOP=1 -f "$f" > /dev/null
           done
