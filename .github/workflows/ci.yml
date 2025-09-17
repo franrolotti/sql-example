@@ -1,0 +1,67 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: practice
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U admin -d practice"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install deps (psql client & sqlfluff)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          python -m pip install --upgrade pip
+          pip install "sqlfluff>=3.0.0" "sqlfluff-templater-jinja"
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -d practice -U admin && break
+            echo "Waiting for Postgres..."; sleep 2
+          done
+
+      - name: Load init SQL (schema + seed)
+        env:
+          PGURL: postgresql://admin:admin@localhost:5432/practice
+        run: |
+          set -e
+          for f in init/*.sql; do
+            echo "=== Running $f ==="
+            psql "$PGURL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Lint SQL
+        run: |
+          sqlfluff lint sql init
+
+      - name: Smoke-run queries in sql/
+        env:
+          PGURL: postgresql://admin:admin@localhost:5432/practice
+        run: |
+          set -e
+          shopt -s nullglob
+          for f in sql/*.sql; do
+            echo "=== Running $f ==="
+            # Fail on first error; only the *final* statement's result is returned (fine for SELECTs)
+            psql "$PGURL" -v ON_ERROR_STOP=1 -f "$f" > /dev/null
+          done

@@ -1,0 +1,31 @@
+[sqlfluff]
+dialect = postgres
+exclude_rules = L009,L031,L034     ; L009: overly strict line-length/indent, L031: alias style, L034: SELECT wildcards
+max_line_length = 120
+templater = jinja                   ; harmless even if you don't use templating yet
+sql_file_exts = .sql
+
+# Formatting
+indent_unit = space
+tab_space_size = 2
+
+[sqlfluff:rules]
+# Capitalise SQL keywords for readability
+capitalisation_policy = upper
+
+# Underscore_case for identifiers (don't force-rename existing tables)
+[sqlfluff:rules:LT05]
+tab_space_size = 2
+
+[sqlfluff:rules:CP01]
+capitalisation_policy = upper       ; keywords (SELECT, FROM, etc.)
+
+[sqlfluff:rules:CP02]
+extended_capitalisation_policy = lower  ; unquoted identifiers (tables/cols) -> lower_case
+
+[sqlfluff:rules:AL02]
+forbid_subquery_in = none           ; be flexible early on
+
+# Ignore generated or external folders
+[sqlfluff:ignore]
+paths = .venv/,**/.ipynb_checkpoints/,data/*.csv,**/migrations/**
