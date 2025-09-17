@@ -1,0 +1,34 @@
+[tool.sqlfluff.core]
+dialect = "postgres"
+exclude_rules = ["L009", "L031", "L034"]  # L009: overly strict line-length/indent, etc.
+max_line_length = 120
+templater = "jinja"  # harmless even if you don't use templating yet
+sql_file_exts = [".sql"]
+
+# Formatting
+indent_unit = "space"
+tab_space_size = 2
+
+[tool.sqlfluff.rules]
+# Capitalise SQL keywords for readability
+capitalisation_policy = "upper"
+
+[tool.sqlfluff.rules.LT05]
+tab_space_size = 2
+
+[tool.sqlfluff.rules.CP01]
+capitalisation_policy = "upper"  # keywords (SELECT, FROM, etc.)
+
+[tool.sqlfluff.rules.CP02]
+extended_capitalisation_policy = "lower"  # unquoted identifiers -> lower_case
+
+[tool.sqlfluff.rules.AL02]
+forbid_subquery_in = "none"  # be flexible early on
+
+[tool.sqlfluff.ignore]
+paths = [
+  ".venv/",
+  "**/.ipynb_checkpoints/",
+  "data/*.csv",
+  "**/migrations/**"
+]
